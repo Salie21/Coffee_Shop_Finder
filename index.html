@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Coffee Finder for South Africa - top picks, near-you discovery, and a live Google Map."
+    />
+    <title>South Africa Coffee Finder</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta name="theme-color" content="#ffffff" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <nav class="nav glass" aria-label="Primary">
+        <div class="nav__inner">
+          <a class="brand" href="#top" aria-label="South Africa Coffee Finder home">
+            <span class="brand__mark" aria-hidden="true">CF</span>
+            <span class="brand__text">South Africa Coffee Finder</span>
+          </a>
+          <div class="nav__links">
+            <a class="glass-btn" href="#top-picks">Top picks</a>
+            <a class="glass-btn" href="#near-you">Near you</a>
+            <a class="glass-btn" href="#map">Map</a>
+          </div>
+          <div class="nav__actions">
+            <form class="nav__search" id="searchForm" role="search">
+              <label class="sr-only" for="navSearch">Search coffee shops</label>
+              <input
+                class="nav__search-input"
+                id="navSearch"
+                name="q"
+                type="search"
+                placeholder="Search (e.g. Starbucks)"
+                autocomplete="off"
+              />
+              <button class="glass-btn" type="submit">Search</button>
+            </form>
+            <button class="glass-btn" id="btnLocate" type="button">
+              Use my location
+            </button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero__overlay" aria-hidden="true"></div>
+        <div class="container hero__grid">
+          <div class="hero__copy">
+            <p class="kicker">PREMIUM COFFEE</p>
+            <h1>Discover the best coffee spots in South Africa</h1>
+            <p class="lead">
+              From top-rated cafes to your closest cup, explore South African coffee with
+              near-me sorting and a live map.
+            </p>
+            <div class="hero__cta">
+              <a class="btn" href="#top-picks">Explore top picks</a>
+              <button class="btn btn--ghost" id="btnHeroLocate" type="button">
+                Find near me
+              </button>
+            </div>
+          </div>
+
+          <div class="hero__art" aria-hidden="true">
+            <div class="drink-stack" role="presentation">
+              <img
+                class="cup"
+                src="assets/coffecup.png"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="top-picks">
+        <div class="container">
+          <div class="section__head">
+            <h2>Top coffee shops in South Africa</h2>
+            <p class="muted">
+              Curated picks to get you started. Tap “Open in Maps” for directions.
+            </p>
+          </div>
+          <div class="grid" id="topPicksGrid" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="section section--alt" id="near-you">
+        <div class="container">
+          <div class="section__head section__head--row">
+            <div>
+              <h2>Coffee near you</h2>
+              <p class="muted">
+                Uses your browser location to sort by distance (on-device).
+              </p>
+            </div>
+            <div class="section__actions">
+              <button class="btn" id="btnNearMe" type="button">Find near me</button>
+              <button class="btn btn--ghost" id="btnReset" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="callout" id="geoStatus" role="status" hidden></div>
+          <div class="grid" id="nearYouGrid" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="section" id="map">
+        <div class="container">
+          <div class="section__head">
+            <h2>Live Google Map</h2>
+            <p class="muted">
+              Embedded map search focused on South Africa.
+            </p>
+          </div>
+
+          <div class="map-card">
+            <iframe
+              title="Google map: coffee shops in South Africa"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              class="map-embed"
+              src="https://www.google.com/maps?q=coffee%20shops%20South%20Africa&output=embed"
+            ></iframe>
+            <div class="map-card__bar">
+              <a
+                class="btn btn--ghost"
+                href="https://www.google.com/maps/search/coffee+shops+South+Africa/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open in Google Maps
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer__bar">
+          Developed by Ridwaan Salie
+        </div>
+      </div>
+    </footer>
+
+    <script defer src="js.js"></script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
