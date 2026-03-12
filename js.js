@@ -97,12 +97,54 @@ const els = {
   btnReset: document.getElementById("btnReset"),
   searchForm: document.getElementById("searchForm"),
   navSearch: document.getElementById("navSearch"),
+  btnMenu: document.getElementById("btnMenu"),
+  mobileDrawer: document.getElementById("mobileDrawer"),
+  btnDrawerClose: document.getElementById("btnDrawerClose"),
+  drawerSearchForm: document.getElementById("drawerSearchForm"),
+  drawerSearch: document.getElementById("drawerSearch"),
+  btnDrawerLocate: document.getElementById("btnDrawerLocate"),
 };
 
 const state = {
   query: "",
   user: null,
 };
+
+function setMenuExpanded(expanded) {
+  if (!els.btnMenu) return;
+  els.btnMenu.setAttribute("aria-expanded", expanded ? "true" : "false");
+}
+
+function isMobileWidth() {
+  return window.matchMedia?.("(max-width: 560px)")?.matches ?? window.innerWidth <= 560;
+}
+
+function openDrawer() {
+  if (!isMobileWidth()) return;
+  const d = els.mobileDrawer;
+  if (!d) return;
+  try {
+    if (typeof d.showModal === "function") d.showModal();
+    else d.setAttribute("open", "");
+    document.body.style.overflow = "hidden";
+    setMenuExpanded(true);
+  } catch {
+    // ignore
+  }
+}
+
+function closeDrawer() {
+  const d = els.mobileDrawer;
+  if (!d) return;
+  try {
+    if (typeof d.close === "function") d.close();
+    else d.removeAttribute("open");
+  } catch {
+    // ignore
+  }
+  document.body.style.overflow = "";
+  setMenuExpanded(false);
+}
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
@@ -253,11 +295,25 @@ function renderTopPicks() {
       els.topPicksGrid.replaceChildren(messageCard(`No matches for “${q}”.`));
       return;
     }
+    if (state.user) {
+      const withDistance = results
+        .map((shop) => ({ shop, distanceKm: haversineKm(state.user, shop) }))
+        .sort((a, b) => a.distanceKm - b.distanceKm);
+      els.topPicksGrid.replaceChildren(...withDistance.map((x) => card(x.shop, x)));
+      return;
+    }
     els.topPicksGrid.replaceChildren(...results.map((s) => card(s)));
     return;
   }
 
   const top = TOP_PICK_IDS.map((id) => SHOP_DATA.find((s) => s.id === id)).filter(Boolean);
+  if (state.user) {
+    const withDistance = top
+      .map((shop) => ({ shop, distanceKm: haversineKm(state.user, shop) }))
+      .sort((a, b) => a.distanceKm - b.distanceKm);
+    els.topPicksGrid.replaceChildren(...withDistance.map((x) => card(x.shop, x)));
+    return;
+  }
   els.topPicksGrid.replaceChildren(...top.map((s) => card(s)));
 }
 
@@ -282,9 +338,10 @@ function resetNearYou() {
     setGeoStatus("", "info");
   }
   renderNearYou(list);
+  renderTopPicks();
 }
 
-async function locateAndSort() {
+async function locateAndSort(options = {}) {
   const list = filteredShops();
   if (list.length === 0) {
     const q = state.query;
@@ -293,10 +350,11 @@ async function locateAndSort() {
     return;
   }
 
-  setGeoStatus("Requesting your location...", "info");
+  const silent = options?.silent === true;
+  if (!silent) setGeoStatus("Requesting your location...", "info");
 
   if (!("geolocation" in navigator)) {
-    setGeoStatus("Geolocation is not supported in this browser.", "error");
+    if (!silent) setGeoStatus("Geolocation is not supported in this browser.", "error");
     return;
   }
 
@@ -307,11 +365,11 @@ async function locateAndSort() {
       maximumAge: 30_000,
     });
   }).catch((err) => {
-    const msg =
-      err?.code === 1
-        ? "Location permission denied. Allow it in your browser settings."
-        : "Could not get your location. Try again.";
-    setGeoStatus(msg, "error");
+    const denied = err?.code === 1;
+    const msg = denied
+      ? "Showing all shops. Allow location to sort closest-first."
+      : "Could not get your location. Try again.";
+    if (!silent) setGeoStatus(msg, denied ? "info" : "error");
     return null;
   });
 
@@ -329,10 +387,14 @@ async function locateAndSort() {
     "success"
   );
   renderNearYou(shopsWithDistance);
+  renderTopPicks();
 }
 
 function applySearch(rawQuery) {
   state.query = normalizeQuery(rawQuery);
+  const next = String(rawQuery ?? "");
+  if (els.navSearch && els.navSearch.value !== next) els.navSearch.value = next;
+  if (els.drawerSearch && els.drawerSearch.value !== next) els.drawerSearch.value = next;
 
   renderTopPicks();
 
@@ -356,13 +418,35 @@ function applySearch(rawQuery) {
   resetNearYou();
 }
 
+async function tryAutoLocateOnLoad() {
+  try {
+    if (!navigator.permissions?.query) return;
+    const perm = await navigator.permissions.query({ name: "geolocation" });
+    if (perm?.state === "denied") return;
+
+    if (perm?.state === "granted") {
+      await locateAndSort({ silent: true });
+      return;
+    }
+
+    // If the browser will prompt, do it on load so the closest shops show first.
+    // If the user declines, the page still shows the full South Africa list.
+    await locateAndSort({ silent: false });
+  } catch {
+    // ignore
+  }
+}
+
 function init() {
   renderTopPicks();
   resetNearYou();
-
   els.btnNearMe?.addEventListener("click", locateAndSort);
   els.btnLocate?.addEventListener("click", locateAndSort);
   els.btnHeroLocate?.addEventListener("click", locateAndSort);
+  els.btnDrawerLocate?.addEventListener("click", async () => {
+    await locateAndSort();
+    closeDrawer();
+  });
   els.btnReset?.addEventListener("click", resetNearYou);
 
   els.searchForm?.addEventListener("submit", (e) => {
@@ -370,10 +454,41 @@ function init() {
     applySearch(els.navSearch?.value);
   });
 
+  els.drawerSearchForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    applySearch(els.drawerSearch?.value);
+    closeDrawer();
+  });
+
   els.navSearch?.addEventListener("input", () => {
     if (!els.navSearch) return;
     if (els.navSearch.value.trim() === "") applySearch("");
   });
+
+  els.drawerSearch?.addEventListener("input", () => {
+    if (!els.drawerSearch) return;
+    if (els.drawerSearch.value.trim() === "") applySearch("");
+  });
+
+  els.btnMenu?.addEventListener("click", openDrawer);
+  els.btnDrawerClose?.addEventListener("click", closeDrawer);
+  els.mobileDrawer?.addEventListener("close", () => {
+    document.body.style.overflow = "";
+    setMenuExpanded(false);
+  });
+  els.mobileDrawer?.addEventListener("click", (e) => {
+    if (e.target === els.mobileDrawer) closeDrawer();
+  });
+  els.mobileDrawer?.addEventListener("click", (e) => {
+    const a = e.target?.closest?.("a[href^='#']");
+    if (a) closeDrawer();
+  });
+
+  window.addEventListener("resize", () => {
+    if (!isMobileWidth()) closeDrawer();
+  });
+
+  tryAutoLocateOnLoad();
 }
 
 init();

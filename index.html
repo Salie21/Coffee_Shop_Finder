@@ -21,6 +21,17 @@
             <span class="brand__mark" aria-hidden="true">CF</span>
             <span class="brand__text">South Africa Coffee Finder</span>
           </a>
+          <button
+            class="glass-btn nav__menu"
+            id="btnMenu"
+            type="button"
+            aria-label="Open menu"
+            aria-controls="mobileDrawer"
+            aria-expanded="false"
+          >
+            <span aria-hidden="true">☰</span>
+            <span class="nav__menu-text">Menu</span>
+          </button>
           <div class="nav__links">
             <a class="glass-btn" href="#top-picks">Top picks</a>
             <a class="glass-btn" href="#near-you">Near you</a>
@@ -46,6 +57,44 @@
         </div>
       </nav>
     </header>
+
+    <dialog class="drawer" id="mobileDrawer" aria-label="Mobile menu">
+      <div class="drawer__panel">
+        <div class="drawer__head">
+          <div class="drawer__brand">
+            <span class="brand__mark" aria-hidden="true">CF</span>
+            <span class="drawer__title">Coffee Finder</span>
+          </div>
+          <button class="glass-btn" id="btnDrawerClose" type="button" aria-label="Close menu">
+            ✕
+          </button>
+        </div>
+
+        <div class="drawer__section">
+          <form class="drawer__search" id="drawerSearchForm" role="search">
+            <label class="sr-only" for="drawerSearch">Search coffee shops</label>
+            <input
+              class="nav__search-input"
+              id="drawerSearch"
+              name="q"
+              type="search"
+              placeholder="Search (e.g. Starbucks)"
+              autocomplete="off"
+            />
+            <button class="glass-btn" type="submit">Search</button>
+          </form>
+          <button class="glass-btn drawer__locate" id="btnDrawerLocate" type="button">
+            Use my location
+          </button>
+        </div>
+
+        <div class="drawer__section">
+          <a class="drawer__link" href="#top-picks">Top picks</a>
+          <a class="drawer__link" href="#near-you">Near you</a>
+          <a class="drawer__link" href="#map">Map</a>
+        </div>
+      </div>
+    </dialog>
 
     <main id="main">
       <section class="hero" id="top">
@@ -156,10 +205,6 @@
     <script defer src="js.js"></script>
   </body>
 </html>
-
-
-
-
 
 
 
